@@ -28,6 +28,7 @@ jobs {
 
         def config = new ConfigSlurper().parse(new File(ctx.artifactoryHome.haAwareEtcDir, PROPERTIES_FILE_PATH).toURL())
         repositoryList = config.repositories
+        prefixes = config.prefixes
 
         //get the local nuget repos and store the keys in ArrayList
         List<String> localRepoKeys = getLocalNugetRepositories()
@@ -60,7 +61,16 @@ jobs {
                         if (id && version) {
                             log.debug "Found a new Nuget package '${itemInfo.repoPath.toPath()}'"
 
-                            FileLayoutInfo layout = new NugetLayoutInfo(id, version)
+                            String itemOrg = id
+                            // If id starts with a prefix, then remove this
+                            for(prefix in prefixes) {
+                                if (id.indexOf(prefix) == 0) {
+                                    itemOrg = id.minus(prefix)
+                                }
+                            }
+							
+                            if (itemOrg) {
+                            FileLayoutInfo layout = new NugetLayoutInfo(id, itemOrg, version)
 
                             //set an updated path for each child repo
                             RepoPath newPath
@@ -78,6 +88,7 @@ jobs {
                             } else {
                                 log.debug "Moved '${itemInfo.name}' from '${itemInfo.repoPath.toPath()}' to '${newPath.toPath()}'"
                             }
+							}
                         }
                     }
                 }
@@ -105,9 +116,9 @@ class NugetLayoutInfo implements FileLayoutInfo {
     String type
     Map<String, String> customFields = [:]
 
-    NugetLayoutInfo(String id, String version) {
+    NugetLayoutInfo(String id, String org, String version) {
         module = id
-        organization = id
+        organization = org
         baseRevision = version
         ext = 'nupkg'
     }

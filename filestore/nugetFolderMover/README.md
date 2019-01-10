@@ -18,3 +18,10 @@ To install this plugin:
   plugin loaded correctly
   - Test with a nuGet package inside one of the nuGet local repositories
   to ensure the file is stored in a containing folder (wait long enough for the cron job to be executed)
+
+#### Configuration
+In the nugetFolderMover.properties file an array of prefixes can be configured i.e. 
+
+`prefixes = ['org.companyName', 'companyName']`
+
+Adding this makes the plugin remove 'org.companyName' or 'companyName' from the folder structure
